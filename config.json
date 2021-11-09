@@ -1,0 +1,75 @@
+
+{ 
+    "routes" : [
+        
+        {
+       
+        "menu_name" : "main",
+        "submenu" : [
+                {  
+                    "group" : [  
+                            { "name" : "Crear factura" , "class" : "Invoices.createView.view" },
+                            { "name" : "Lista facturas" , "class" : "Invoices.listView.view" }
+                    ]
+                },
+                {  
+                    "group" : [  
+                            { "name" : "Clientes" , "class" : "Customers.listView.view" }
+                    ]
+
+                },
+                {  
+                    "group" : [  
+                            { "name" : "Products" , "class" : "Products.listView.view" }
+                        ]
+                }
+            ]
+        },
+        {
+       
+            "menu_name" : "Herramientas",
+            "submenu" : [ 
+              
+                { 
+                    "group" : [  
+                        { "name" : "Importar" , "class" : "Invoices.createView.view" },
+                        { "name" : "Exportar" , "class" : "Invoices.createView.view" }
+                    ] 
+                }
+             ] 
+            
+    
+        } ,
+        {
+       
+            "menu_name" : "Configuracion",
+            "submenu" : [ 
+                { 
+                    "group" : [  
+                        { "name" : "Base de datos" , "class" : "Invoices.createView.view" }
+                    ] 
+                },
+                { 
+                    "group" : [  
+                            { "name" : "Integracion edocs" , "class" : "Invoices.createView.view" }
+                    ] 
+                }
+                
+             ] 
+            
+    
+        } 
+           
+    ],
+    
+    "database" :  { 
+
+        "db_type" : "sqlite",
+        "db_name" : "edocs_facturador.db3",
+        "db_mysql_host" : "",
+        "db_mysql_user" : "",
+        "db_mysql_pass" : ""
+
+    }
+
+}
