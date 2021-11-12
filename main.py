@@ -1,11 +1,12 @@
 from tkinter import *
 from platform import system
-import os.path
-import pathlib
+from helpers import helper
 from tkinter import messagebox
-from  tkinter import ttk
+from tkinter import ttk
 import json
+import views
 from io import open
+from tkcalendar import Calendar
 
 class App:
 
@@ -15,6 +16,7 @@ class App:
         self.config_file = self.getConfig()
         
         self.screen = Tk()
+
         self.view = Frame(self.screen)
         self.title = " Facturador Edocs"
 
@@ -22,22 +24,30 @@ class App:
 
         if platformD == 'Darwin':
 
-            self.icon  = os.path.abspath('./images/logo.icns')
-
+           self.icon  = helper.find_data_file('images/logo.icns')
+          
         else:
-            self.icon  = os.path.abspath('./images/logo.ico')
+           
+           self.icon  = helper.find_data_file('images/logo.ico')
 
+       
         self.bodyBgColor = 'lightgray'
         self.resizable = TRUE
-        self.minsizeHeight = 550
+        self.minsizeHeight = 700
         self.minsizeWidht  = 1024
+
+
+        self.parent_position = self.definePositionCenter(self.screen, self.minsizeWidht , self.minsizeHeight  )
 
         self.padx = 5
         self.pady = 5
-        self.geometry = f"{str(self.minsizeWidht)}x{str(self.minsizeHeight)}"
+        self.geometry = f"{str(self.minsizeWidht)}x{str(self.minsizeHeight)}+{self.parent_position}"
+
         self.font = "Open Sans"
         self.screen.grid_columnconfigure(0, weight=1)
         self.screen.grid_rowconfigure(0, weight=1)
+
+        self.style()
 
     #menu
     def SetMenu(self):
@@ -77,34 +87,43 @@ class App:
                 
         return main_menu
 
+    #config ans styles 
     def getConfig(self):
 
-        ruta = f"{str(pathlib.Path().absolute())}/config.json"
+        ruta = helper.find_data_file('config.json')
+        
         config = open(ruta,"r")
         
         data = json.load(config)
         return data
 
-    # def mainScreenUpdate(self):
-    #     self.screen.update()
+    def style(self): 
 
-    def load(self):
-       
-        self.screen.title(self.title)
+        # table style 
+        style = ttk.Style()
+        
+        style.configure("Treeview",
+            background="#F5F5F5",
+            foreground="black",
+            rowheight = 20,
+            fieldbackground =  "#F5F5F5",
+        )
 
-        self.screen.config( menu=self.SetMenu() , bg=self.bodyBgColor, padx= self.padx, pady=self.padx)
-        self.screen.iconbitmap(self.icon)
-        self.screen.geometry(self.geometry)
-        self.screen.minsize(self.minsizeWidht,self.minsizeHeight)
+        style.map('Treeview',
+            
+            background=[('selected','lightgreen')],
+        
+        )
 
-        if self.resizable :
-            self.screen.resizable(1,1)
-        else: 
-            self.screen.resizable(0,0)
+    def definePositionCenter(self,screen,w,h):
 
-    def run(self):
-        # RUN PROGRAM 
-        self.screen.mainloop()
+        screen_w = screen.winfo_screenwidth()
+        screen_h = screen.winfo_screenheight()
+        
+        x =  (screen_w / 2) - (w / 2)
+        y =  (screen_h / 2) - (h / 2)
+
+        return f"{int(x)}+{int(y)}"
 
     #Custom object on subscreen
     def header(self,texto):
@@ -188,20 +207,7 @@ class App:
             insert_on =  into_frame
         else:
             insert_on =  self.view
-        style = ttk.Style()
         
-        style.configure("Treeview",
-            background="#F5F5F5",
-            foreground="black",
-            rowheight = 20,
-            fieldbackground =  "#F5F5F5",
-        )
-
-        style.map('Treeview',
-            
-            background=[('selected','lightgreen')],
-        
-        )
 
         table = ttk.Treeview(insert_on, columns = columns)
         table['show'] = 'headings'
@@ -209,7 +215,6 @@ class App:
         
         table.tag_configure( 'oddrow',  background="#F5F5F5" )
         table.tag_configure( 'evenrow',  background="lightblue" )
-
 
         if ColSpan != 0 :
              table.grid( columnspan=ColSpan  )
@@ -220,28 +225,16 @@ class App:
         for hdr in columns:
             if hdr == '#' : 
               table.column(f'#{i}', anchor=CENTER, stretch = NO, width = 50 )
-            table.heading(f'#{i}',text=hdr) 
-           
+              table.heading(f'#{i}',text=hdr) 
+            else: 
+            #   table.column(f'#{i}', anchor=CENTER, stretch = NO, width = 50 )
+              table.heading(f'#{i}',text=hdr) 
             i+=1
-        
-        count = 0
-        if data != None : 
-           for row in data: 
-                if count % 2 == 0:
-                    table.insert('',0,values=row, tags=('evenrow'))
-                else: 
-                    table.insert('',0,values=row, tags=('oddrow'))
-                count += 1
+
+        table = self.insertTableData(table,data)
+      
         return table
    
-    def getTableItem(self, table):
-        try:
-           values = table.item(table.focus())['values']
-        #table.
-           return values
-        except Exception as e:  
-            messagebox.showerror('Error',str(e))  
-
     def newFrame(self , Bg = 'white', Row = 0 , Col = 0, ColSpan = 0,  Pos = 'W', bw = 1 , rel = 'groove', Margin = 0, into_window = None):
 
         if into_window != None:
@@ -262,6 +255,55 @@ class App:
 
         return this_frame
 
+    def newDatePicker(self,Command = 'null'): 
+        
+        width = 280
+        height = 250
+        title = "Seleccionar fecha"
+       # modal = Tk()
+        modal = Toplevel()
+        modal.config( bg=self.bodyBgColor, padx= 0, pady= 0)
+        modal.geometry(f"{str(width)}x{str(height)}+{self.definePositionCenter(modal, width , height  )}")
+        modal.minsize(width,height)
+        modal.title(title)
+        modal.resizable(0,0)
+
+        modal.focus_force()     # Get focus
+        modal.lift() # Raise in stacking order
+        modal.grab_set_global()
+     
+
+        cal = Calendar(modal,
+                    font="Arial 14", 
+                    selectmode='day',
+                    cursor="hand1", year=2018, month=2, day=5)
+
+        cal.grid(row = 0,column = 0 ,padx=0, pady=0 ,sticky = N+W+E+S )
+       
+        self.newButton( Name= "Seleccionar", Row = 1 , Col=0, Pos = N+W+E+S , Command = Command,into_frame = modal)
+
+        self.screen.update()
+        return [cal,modal] 
+
+    def newLongText(self,  Row = 0 , Col = 0, Pos = 'W', Long = 100, Show = 'normal', Orientacion = 'left', Input = "", Data = "", into_frame = None ):
+        if into_frame != None:
+            insert_on =  into_frame
+        else:
+            insert_on =  self.view
+
+        input = Text(insert_on)
+
+        input.config( width= Long,
+                      state = Show,
+                      textvariable= Data,
+                      border=0
+                      )
+
+        if Input != "" :
+            input.insert(-1, Input)
+
+        input.grid(row = Row, column = Col , sticky=Pos , padx=5, pady=5)   
+
     def ViewFrame(self):
         
             if hasattr(self, 'view'):
@@ -280,7 +322,7 @@ class App:
         # modal = Tk()
         modal = Toplevel()
         modal.config( bg=self.bodyBgColor, padx= self.padx, pady=self.padx)
-        modal.geometry(f"{str(width)}x{str(height)}")
+        modal.geometry(f"{str(width)}x{str(height)}+{self.definePositionCenter(modal, width , height  )}")
         modal.minsize(width,height)
         modal.title(title)
         modal.resizable(0,0)
@@ -291,6 +333,28 @@ class App:
         self.screen.update()
         return modal
 
+    # functions of screen objects
+    def insertTableData(self,obj,data):
+
+        count = 0
+        if data != None : 
+           for row in data: 
+                if count % 2 == 0:
+                    obj.insert('',0,values=row, tags=('evenrow'))
+                else: 
+                    obj.insert('',0,values=row, tags=('oddrow'))
+                count += 1
+        return obj
+
+    def getTableItem(self, table):
+        try:
+           values = table.item(table.focus())['values']
+        #table.
+           return values
+        except Exception as e:  
+            messagebox.showerror('Error',str(e))  
+    
+    # open view selected
     def openView(self,name):
       
         try:
@@ -309,6 +373,25 @@ class App:
         except Exception as e:
             messagebox.showerror('Error',str(e))  
 
+    #Load , run , close
+    def load(self):
+       
+        self.screen.title(self.title)
+        self.screen.iconbitmap(self.icon)
+        self.screen.config( menu=self.SetMenu() , bg=self.bodyBgColor, padx= self.padx, pady=self.padx)
+        
+        self.screen.geometry(self.geometry)
+        self.screen.minsize(self.minsizeWidht,self.minsizeHeight)
+
+        if self.resizable :
+            self.screen.resizable(1,1)
+        else: 
+            self.screen.resizable(0,0)
+
+    def run(self):
+        # RUN PROGRAM 
+        self.screen.mainloop()
+    
     def quitProgram(self):
 
         ask = messagebox.askquestion("Salir de Edocs", "¿Esta seguro de querer salir el programa?")

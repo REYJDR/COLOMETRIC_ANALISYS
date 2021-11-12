@@ -1,8 +1,8 @@
 import json
 from io import open
-import pathlib
 import sqlite3
 import mysql.connector
+from helpers import helper
 
 from tkinter import messagebox
 
@@ -15,7 +15,7 @@ class repository :
         try:
            
 
-            ruta = f"{str(pathlib.Path().absolute())}/config.json"
+            ruta = helper.find_data_file('config.json')
             config = open(ruta,"r")
             
             data = json.load(config)
@@ -62,7 +62,7 @@ class repository :
 
         try :     
 
-            ruta = f"{str(pathlib.Path().absolute())}/db_script.sql"
+            ruta = helper.find_data_file("db_script.sql")
             script = open(ruta,"r")
             self.db_conexion.executescript(script.read())
             has_tables = self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
