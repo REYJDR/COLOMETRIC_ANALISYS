@@ -3,6 +3,7 @@ import os
 from tkinter import messagebox  
 from difflib import SequenceMatcher
 from tkinter.constants import TRUE
+from io import open
 
 class helper: 
 
@@ -60,3 +61,16 @@ class helper:
         except Exception as e:
             
             return False
+
+    def OpenFile(filename):
+        
+        if getattr(sys, "frozen", False):
+            # The application is frozen
+            datadir = os.path.dirname(sys.executable)
+        else:
+            # The application is not frozen
+            # Change this bit to match where you store your data files:
+            datadir = os.path.dirname(__file__)
+        dir = os.path.join(datadir, filename)
+    
+        return open(dir ,"r")

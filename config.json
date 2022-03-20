@@ -20,45 +20,50 @@
                 },
                 {  
                     "group" : [  
-                            { "name" : "Products" , "class" : "Products.listView.view" }
+                            { "name" : "Productos" , "class" : "Products.listView.view" }
                         ]
                 }
             ]
         },
         {
        
-            "menu_name" : "Herramientas",
-            "submenu" : [ 
-              
-                { 
+            "menu_name" : "Configuracion",
+            "submenu" : [{ 
                     "group" : [  
-                        { "name" : "Importar" , "class" : "Invoices.createView.view" },
-                        { "name" : "Exportar" , "class" : "Invoices.createView.view" }
+                            { "name" : "Informacion de Compañia" , "class" : "Settings.Company.view" },
+                            { "name" : "Integracion edocs" , "class" : "Settings.Edocs.view" }
                     ] 
                 }
+              
              ] 
             
     
-        } ,
+        },
+
         {
        
-            "menu_name" : "Configuracion",
+            "menu_name" : "Integraciones",
             "submenu" : [ 
                 { 
+            
                     "group" : [  
-                        { "name" : "Base de datos" , "class" : "Invoices.createView.view" }
-                    ] 
-                },
-                { 
+                        { "name" : "SiteLink" , "class" : "Integrations.Sitelink.settingsView.view" },
+                        { "name" : "Quickbooks" , "class" : "Integrations.Quickbooks.settingsView.view" }
+                    ]
+                 },
+                 {
                     "group" : [  
-                            { "name" : "Integracion edocs" , "class" : "Invoices.createView.view" }
+                        { "name" : "Activar fuente" , "class" : "Integrations.ActiveSource.settingsView.view" }
                     ] 
-                }
+
+                 }
+ 
                 
-             ] 
+                ] 
             
     
         } 
+
            
     ],
     
@@ -71,5 +76,6 @@
         "db_mysql_pass" : ""
 
     }
+
 
 }

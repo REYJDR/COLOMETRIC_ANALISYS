@@ -1,20 +1,18 @@
 import json
 from io import open
 import sqlite3
-import mysql.connector
+#import mysql.connector
 from helpers import helper
 
 from tkinter import messagebox
 
 class repository : 
-    
-    db_conexion = None
 
+    # self.db_conexion = None
+    # self.curso = None
     def __init__(self):
-  
-        try:
-           
 
+        try:
             ruta = helper.find_data_file('config.json')
             config = open(ruta,"r")
             
@@ -28,15 +26,12 @@ class repository :
 
 
             if type == "sqlite" : 
-
+                
                 self.db_conexion = sqlite3.connect(db_name)
+                self.db_conexion.row_factory = sqlite3.Row
                 self.cursor = self.db_conexion.cursor()
+                self.createTables()
 
-                has_tables = self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-
-                if len(has_tables.fetchall()) == 0 : 
-                    self.createTables()
-               
 
             elif type == "mysql" :
 
@@ -48,7 +43,7 @@ class repository :
                     database = db_name,
 
                 )
-                self.cursor = self.db_conexion.cursor()
+                self.cursor= self.db_conexion.cursor()
             else: 
                 messagebox.showerror(title="Error", message= "No existe conexion a DB establecida") 
 
@@ -58,6 +53,7 @@ class repository :
         finally:
             config.close()
 
+
     def createTables(self):
 
         try :     
@@ -66,7 +62,7 @@ class repository :
             script = open(ruta,"r")
             self.db_conexion.executescript(script.read())
             has_tables = self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-            print(has_tables.fetchall())
+            # print(has_tables.fetchall())
         except Exception as e: 
             messagebox.showerror(title="Error", message= str(e))
 
@@ -74,15 +70,26 @@ class repository :
 
         try :     
             table = self.__class__.__name__
+ 
+            for k in list(dataValue):
+                if k.startswith('db_'):
+                    dataValue.pop(k)
+                elif k.startswith('cursor'):
+                    dataValue.pop(k)
 
             # Get all "keys" inside "values" key of dictionary (column names)
+       
             columns = ', '.join(dataValue.keys())  
 
             # Get all "values" inside "values" key of dictionary (insert values)
             data =   ', '.join(['?' for s in dataValue])
 
             listValues = list(dataValue.values())
+      
             query = f"INSERT INTO {table} ({columns}) VALUES ({data})"
+
+
+
             self.cursor.execute( query , tuple(listValues))
 
             self.db_conexion.commit()
@@ -154,10 +161,11 @@ class repository :
             clause = f" where {condition}"
 
             query = f"select {columns} from {table} {clause}"
+  
             self.cursor.execute( query )
             self.db_conexion.commit()
-           
-            return self.cursor.fetchall()
+        
+            return [dict(row) for row in self.cursor.fetchall()]
 
         except Exception as e: 
             messagebox.showerror(title="Error", message= str(e))
@@ -167,9 +175,16 @@ class repository :
         try :     
             table = self.__class__.__name__
 
-            # Get all "values" inside "values" key of dictionary (insert values)
-            data =   ",".join([f"'{k}' = ?" for k in dataValue.keys()])
+          
            
+            for k in list(dataValue):
+                if k.startswith('db_'):
+                    dataValue.pop(k)
+                elif k.startswith('cursor'):
+                    dataValue.pop(k)
+                    
+             # Get all "values" inside "values" key of dictionary (insert values)
+            data =   ",".join([f"'{k}' = ?" for k in dataValue.keys()])
             valuesList = list(dataValue.values())
             valuesList.append(id)
             query = f"UPDATE {table} set {data} WHERE id = ?"

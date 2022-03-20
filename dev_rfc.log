@@ -1,0 +1,10 @@
+
+**** Log file opened at 2021-11-12 15:39:09.304706 UTC-06:00 (UTC), Encoding UTF-8
+NW RFC Library: SDK variant, Release 750 Patch Level 8, Compiled on Apr 18 2021 18:01:01
+ CPIC library: 753.2020.03.230 version 3, NI library: 40, Kernel Release: 753 Patch Level 814
+ Current working directory: /Users/reyjdaou/Documents/GitHub/EDOCS_FACTURADOR_DESKTOP, Program: Python
+ Hardware: Apple Macintosh with Mac OS X (Darwin) INTEL x86_64 x86_64, Operating_system: Darwin 19.6.0
+ Hostname: MacRey.local, IP address: 127.0.0.1, IPv6 address: 
+
+2021-11-12 15:39:09.305797 [4602355136] >> Info entry
+	Did not find config file /Users/reyjdaou/Documents/GitHub/EDOCS_FACTURADOR_DESKTOP/sapnwrfc.ini.

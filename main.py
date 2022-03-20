@@ -7,6 +7,7 @@ import json
 import views
 from io import open
 from tkcalendar import Calendar
+import datetime
 
 class App:
 
@@ -36,7 +37,6 @@ class App:
         self.minsizeHeight = 700
         self.minsizeWidht  = 1024
 
-
         self.parent_position = self.definePositionCenter(self.screen, self.minsizeWidht , self.minsizeHeight  )
 
         self.padx = 5
@@ -48,6 +48,10 @@ class App:
         self.screen.grid_rowconfigure(0, weight=1)
 
         self.style()
+
+        # referecne image objects for switch toggle
+        self.swImgOn()
+        self.swImgOff()
 
     #menu
     def SetMenu(self):
@@ -78,6 +82,7 @@ class App:
                 if len(menu['submenu']) > 0 :
                     for menu_sub_item in menu['submenu']:
                         for group in menu_sub_item['group']:
+                                
                             new_sub_menu.add_command(label=group['name'], command= lambda class_item=group['class'] : self.openView(class_item))
                          
                         new_sub_menu.add_separator()    
@@ -128,17 +133,8 @@ class App:
     #Custom object on subscreen
     def header(self,texto):
         self.screen.title(texto)
-        # header = Label(self.view, text=texto)
-
-        # header.config( 
-        #     fg="white",
-        #     bg="darkgray",
-        #     font=(self.font, 18),
-        #     pady=10 )
-
-        # header.grid(row=0,column=0,columnspan=2)
-
-    def newEntry(self,  Row = 0 , Col = 0, Pos = 'W', Long = 100, Show = 'normal', Orientacion = 'left', Input = "", Data = "", into_frame = None):
+     
+    def newEntry(self,  Row = 0 , Col = 0, Pos = 'W', Long = 100, Show = 'normal', Orientacion = 'left', Input = "", Data = "", into_frame = None, mask = None):
         
         if into_frame != None:
             insert_on =  into_frame
@@ -147,11 +143,18 @@ class App:
 
         input = Entry(insert_on)
 
+        if mask == True : 
+            show = '*'
+        else: 
+            show = None
+
         input.config( width= Long,
                       state = Show,
                       justify= Orientacion,
                       textvariable= Data,
-                      border=0
+                      border=1,
+                      background = "lightgray",
+                      show= show 
                       )
 
         if Input != "" :
@@ -197,23 +200,28 @@ class App:
         else:
             insert_on =  self.view
 
-        selectOption = OptionMenu(insert_on ,SelectedOption,*options)
+        selectOption = OptionMenu(insert_on ,SelectedOption, *options)
         selectOption.config( width= Long , border=0)
         selectOption.grid(row = Row,column= Col ,padx=5, pady=5 ,sticky = Pos )
 
-    def newTable(self, columns, Row = 0 , Col = 0,  ColSpan = 0, Pos = 'W', into_frame = None, data = None):
+    def newTable(self, columns, Row = 0 , Col = 0,  ColSpan = 0, Pos = 'W', into_frame = None, data = None, hasChkBox = None):
 
         if into_frame != None:
             insert_on =  into_frame
         else:
             insert_on =  self.view
         
+        # if hasChkBox == True :
+        #      table = CheckboxTreeview(insert_on, columns = columns)
+        # else:
 
         table = ttk.Treeview(insert_on, columns = columns)
+
+
         table['show'] = 'headings'
         table.grid(row = Row, padx=5, pady=5 ,sticky = Pos )
         
-        table.tag_configure( 'oddrow',  background="#F5F5F5" )
+        table.tag_configure( 'oddrow',   background="#F5F5F5" )
         table.tag_configure( 'evenrow',  background="lightblue" )
 
         if ColSpan != 0 :
@@ -226,15 +234,18 @@ class App:
             if hdr == '#' : 
               table.column(f'#{i}', anchor=CENTER, stretch = NO, width = 50 )
               table.heading(f'#{i}',text=hdr) 
-            else: 
-            #   table.column(f'#{i}', anchor=CENTER, stretch = NO, width = 50 )
-              table.heading(f'#{i}',text=hdr) 
+            else:  
+              
+              columnWidht = self.minsizeWidht / (len(columns))
+
+              table.column(f'#{i}', anchor=CENTER, stretch = NO,  width = int(columnWidht) - 50)
+              table.heading(f'#{i}',text=hdr )
             i+=1
 
         table = self.insertTableData(table,data)
       
         return table
-   
+         
     def newFrame(self , Bg = 'white', Row = 0 , Col = 0, ColSpan = 0,  Pos = 'W', bw = 1 , rel = 'groove', Margin = 0, into_window = None):
 
         if into_window != None:
@@ -257,6 +268,7 @@ class App:
 
     def newDatePicker(self,Command = 'null'): 
         
+        now = datetime.datetime.now()
         width = 280
         height = 250
         title = "Seleccionar fecha"
@@ -274,9 +286,9 @@ class App:
      
 
         cal = Calendar(modal,
-                    font="Arial 14", 
+                    font="Arial 10", 
                     selectmode='day',
-                    cursor="hand1", year=2018, month=2, day=5)
+                    cursor="hand1", year=now.year, month=now.month, day=now.day)
 
         cal.grid(row = 0,column = 0 ,padx=0, pady=0 ,sticky = N+W+E+S )
        
@@ -285,7 +297,8 @@ class App:
         self.screen.update()
         return [cal,modal] 
 
-    def newLongText(self,  Row = 0 , Col = 0, Pos = 'W', Long = 100, Show = 'normal', Orientacion = 'left', Input = "", Data = "", into_frame = None ):
+    def newLongText(self,  Row = 0 , Col = 0, Pos = 'W', Long = 30, Show = 'normal', Orientacion = 'left', Input = "", Data = "", into_frame = None ):
+      
         if into_frame != None:
             insert_on =  into_frame
         else:
@@ -295,14 +308,19 @@ class App:
 
         input.config( width= Long,
                       state = Show,
-                      textvariable= Data,
                       border=0
                       )
+
+        if Data != "":
+            input.insert(INSERT, Data)
+
 
         if Input != "" :
             input.insert(-1, Input)
 
         input.grid(row = Row, column = Col , sticky=Pos , padx=5, pady=5)   
+
+        return input
 
     def ViewFrame(self):
         
@@ -333,6 +351,37 @@ class App:
         self.screen.update()
         return modal
 
+    def newToggleSwitch(self, Row = 0 , Col = 0, Pos = 'W', Command = 'null' , into_frame = None ,is_on = False):
+      
+        if into_frame != None:
+            insert_on =  into_frame
+        else:
+            insert_on =  self.view
+       
+        button = Button(insert_on,  bd = 0, bg="#f5f5f5" )
+   
+        if is_on :
+         
+           button.config( image = self.on , compound=CENTER)
+        else :
+         
+           button.config( image = self.off , compound=CENTER )
+
+        button.config( 
+            
+            borderwidth=0,
+            command=  Command
+        )
+
+        button.grid(row = Row,column = Col ,padx=1, pady=1,sticky = Pos )
+        return button
+
+    def swImgOn(self):
+        self.on = PhotoImage(file = helper.find_data_file('images/on_2.png')) 
+ 
+    def swImgOff(self):
+        self.off = PhotoImage(file = helper.find_data_file('images/off_2.png')) 
+        
     # functions of screen objects
     def insertTableData(self,obj,data):
 
@@ -354,6 +403,9 @@ class App:
         except Exception as e:  
             messagebox.showerror('Error',str(e))  
     
+    def updateScreen(self):
+        self.screen.update()
+
     # open view selected
     def openView(self,name):
       
@@ -362,9 +414,14 @@ class App:
             self.ViewFrame()
 
             components = name.split('.')
-            route = f"views.{components[0]}.{components[1]}"
-            mod = __import__(route, fromlist=[components[2]])
-            viewClass = getattr(mod, components[2])
+            if len(components) <= 3:
+                route = f"views.{components[0]}.{components[1]}"
+                mod = __import__(route, fromlist=[components[2]])
+                viewClass = getattr(mod, components[2])
+            else :
+                route = f"views.{components[0]}.{components[1]}.{components[2]}"
+                mod = __import__(route, fromlist=[components[3]])
+                viewClass = getattr(mod, components[3])
 
             view = viewClass(self)
             view.index()

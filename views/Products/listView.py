@@ -25,6 +25,7 @@ class view:
                    )
 
         self.list = self.controller.getProductList(self.columns)
+       
 
     def index(self):
 
@@ -79,7 +80,6 @@ class view:
         modal_frame =  self.program.newFrame(Row = 0, Col = 0, Pos='NWE', Margin = 5, Bg= self.frame_bgc, into_window = modal)
         
         
-
         product_frame =  self.program.newFrame(Row = 0 , Col = 0, Pos='NE', Margin = 5, Bg=self.frame_bgc, into_window = modal_frame)
         
         self.program.newLabel(  LabelName = "Codigo :", Pos = 'W', Row = 0, Col = 0, Bg=self.frame_bgc ,into_frame = product_frame)

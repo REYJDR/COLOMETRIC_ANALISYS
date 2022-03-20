@@ -5,7 +5,8 @@ Program = App()
 Program.load()
 
 #start default vire
-Program.openView('Invoices.createView.view')
-# Program.openView('Products.listView.view')
+#Program.openView('SAP.se16.view')
+#Program.openView('Invoices.createView.view')
+Program.openView('Invoices.listView.view')
 #Run program
 Program.run()
